@@ -13,3 +13,9 @@ class DataIngestionConfig:
 class DataTransformationConfig:
     X_preprocessor_obj_file_path = os.path.join('artifacts',"x_preprocessor.pkl")
     Y_preprocessor_obj_file_path = os.path.join('artifacts',"y_preprocessor.pkl")
+
+
+@dataclass
+class ModelTrainerConfig:
+    trained_model_file_path = os.path.join("artifacts","model.pkl")
+    model_threshold_accuracy = 0.3
