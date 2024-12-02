@@ -4,13 +4,13 @@ import pandas as pd
 
 from src.exception import CustomException
 from src.logger import logging
-from src.components.configs import configurations
+from src.components.configs.configurations import DataIngestionConfig
 
 from sklearn.model_selection import train_test_split
 
 class DataIngestion:
     def __init__(self):
-        self.ingestion_config = configurations.DataIngestionConfig()
+        self.ingestion_config = DataIngestionConfig()
 
     def initiate_data_ingestion(self):
         logging.info("Entered the data ingestion method or component")
