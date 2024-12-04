@@ -1,0 +1,73 @@
+<html>
+    <body>
+        <div class="login">
+            <h1>Wine Quality Indicator</h1>
+
+            <form action="{{ url_for('predict_datapoint')}}" method="post">
+                <h2><legend>Wine Quality Predictor</legend></h2>
+                <h3><legend>Physicochemical Tests:</legend></h3>
+
+                <div class="mb-3">
+                    <label class="form-label">Fixed Acidity</label>
+                    <input class="form-control" type="number" name="fixed_acidity"
+                        placeholder="Enter the Fixed Acidity" min="0" max="100" step="0.000001" style="width: 200px; "/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Volatile Acidity</label>
+                    <input class="form-control" type="number" name="volatile_acidity"
+                        placeholder="Enter the Volatile Acidity" min="0" max="100" step="0.000001" style="width: 200px;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Citric Acid</label>
+                    <input class="form-control" type="number" name="citric_acid"
+                        placeholder="Enter the Citric Acid" min="0" max="100" step="0.000001" style="width: 200px;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Residual Sugar</label>
+                    <input class="form-control" type="number" name="residual_sugar"
+                        placeholder="Enter your Residual Sugar" min="0" max="100" step="0.000001" style="width: 200px;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Chlorides</label>
+                    <input class="form-control" type="number" name="chlorides"
+                        placeholder="Enter the Chlorides" min="0" max="100" step="0.000001" style="width: 200px;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Free Sulfur Dioxide</label>
+                    <input class="form-control" type="number" name="free_sulfur_dioxide"
+                        placeholder="Enter the Free Sulfur Dioxide" min="0" max="100" step="0.000001" style="width: 200px;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Total Sulfur Dioxide</label>
+                    <input class="form-control" type="number" name="total_sulfur_dioxide"
+                        placeholder="Enter the Total Sulfur Dioxide" min="0" max="100" step="0.000001" style="width: 200px;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Density</label>
+                    <input class="form-control" type="number" name="density"
+                        placeholder="Enter the Density" min="0" max="100" step="0.000001" style="width: 200px;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">pH</label>
+                    <input class="form-control" type="number" name="pH"
+                        placeholder="Enter the pH" min="0" max="100" step="0.000001" style="width: 200px;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Sulphates</label>
+                    <input class="form-control" type="number" name="sulphates"
+                        placeholder="Enter the Sulphates" min="0" max="100" step="0.000001" style="width: 200px;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Alcohol</label>
+                    <input class="form-control" type="number" name="alcohol"
+                        placeholder="Enter the Alcohol" min="0" max="100" step="0.000001" style="width: 200px;" />
+                </div>
+                <div class="mb-3">
+                    <input class="btn btn-primary" type="submit" value="Predict the Wine Quality" required />
+                </div>
+            </form>
+
+            <h2>THE  prediction is {{results}}</h2>
+        </div>
+    <body>
+</html>

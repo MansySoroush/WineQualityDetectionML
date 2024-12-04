@@ -23,17 +23,17 @@ def evaluate_models(X_train, y_train, X_test, y_test, models):
         report = {}
 
         for name, model, params in models:
-            search_cv = GridSearchCV(estimator=model,
-                                    param_grid=params,
-                                    n_jobs=-1,
-                                    cv=3)
-            # search_cv = RandomizedSearchCV(estimator=model,
-            #                             param_distributions=params,
-            #                             n_iter=100,
-            #                             cv=3,
-            #                             verbose=2,
-            #                             random_state=42,
-            #                             n_jobs=-1)
+            # search_cv = GridSearchCV(estimator=model,
+            #                         param_grid=params,
+            #                         n_jobs=-1,
+            #                         cv=3)
+            search_cv = RandomizedSearchCV(estimator=model,
+                                        param_distributions=params,
+                                        n_iter=100,
+                                        cv=3,
+                                        verbose=2,
+                                        random_state=42,
+                                        n_jobs=-1)
             search_cv.fit(X_train, y_train)
 
             model.set_params(**search_cv.best_params_)
@@ -61,3 +61,11 @@ def evaluate_model(true, predicted):
     precision = precision_score(true, predicted, average='weighted')  # Calculate Precision for multi-class
     recall = recall_score(true, predicted, average='weighted')  # Calculate Recall for multi-class
     return accuracy, f1, precision, recall
+
+def load_object(file_path):
+    try:
+        with open(file_path, "rb") as file_obj:
+            return dill.load(file_obj)
+
+    except Exception as e:
+        raise CustomException(e, sys)
