@@ -2,7 +2,7 @@ import sys
 
 from src.exception import CustomException
 from src.logger import logging
-from src.utils import save_object, evaluate_models
+from src.utils import save_object, evaluate_models, calculate_score
 from src.components.configs.configurations import ModelTrainerConfig
 
 from src.components.data_ingestion import DataIngestion
@@ -38,34 +38,37 @@ class ModelTrainer:
             model_report:dict = evaluate_models(X_train = X_train, y_train = y_train,
                                                 X_test = X_test, y_test = y_test,
                                                 models = models)
-            
-            # To get best model accuracy from dict
-            best_model_accuracy = max(sorted(model_report.values()))
+            # Rank models by combined score
+            scores = {
+                name: calculate_score(model_info["test_metrics"]) for name, model_info in model_report.items()
+            }
 
-            # To get best model name from dict
-            best_model_name = list(model_report.keys())[
-                list(model_report.values()).index(best_model_accuracy)
-            ]
+            best_model_name = max(scores, key=scores.get)
+            best_model_score = scores[best_model_name]
+
+            threshold_score = calculate_score(self.model_trainer_config.thresholds)
+            logging.info(f"threshold_score: {threshold_score}")
+            logging.info(f"best_model_score: {best_model_score}")
+
+            if best_model_score < threshold_score:
+                raise CustomException("No model met the performance threshold")
+
+            # Retrieve the best model
             best_model = self.get_model_by_name(model_name= best_model_name, models= models)
 
             if best_model == None:
                 raise CustomException("No best model found")
-
-            if best_model_accuracy < self.model_trainer_config.model_threshold_accuracy:
-                raise CustomException("No best model found")
             
             logging.info(f"Best found model on both training and testing dataset")
             logging.info(f"------------Results-----------")
-            logging.info(f"Best found model name: {best_model_name}")
-            logging.info(f"Best found model accuracy: {best_model_accuracy}")
+            logging.info(f"Selected Model: {best_model_name}")
+            logging.info(f"Best Params: {model_report[best_model_name]['params']}")
+            logging.info(f"Test Metrics: {model_report[best_model_name]['test_metrics']}")
+            logging.info(f"Score: {best_model_score}")
             logging.info(f"------------------------------")
 
-
-            save_object(
-                file_path = self.model_trainer_config.trained_model_file_path,
-                obj = best_model
-            )
-
+            # Save and return the best model
+            save_object(self.model_trainer_config.trained_model_file_path, obj= best_model)
             predicted = best_model.predict(X_test)
             accuracy = accuracy_score(y_test, predicted)
 

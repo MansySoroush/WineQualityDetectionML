@@ -3,6 +3,7 @@ import sys
 import dill
 
 from src.exception import CustomException
+from src.components.configs.configurations import WeightScoreConfig
 from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve 
 
@@ -23,10 +24,6 @@ def evaluate_models(X_train, y_train, X_test, y_test, models):
         report = {}
 
         for name, model, params in models:
-            # search_cv = GridSearchCV(estimator=model,
-            #                         param_grid=params,
-            #                         n_jobs=-1,
-            #                         cv=3)
             search_cv = RandomizedSearchCV(estimator=model,
                                         param_distributions=params,
                                         n_iter=100,
@@ -36,19 +33,24 @@ def evaluate_models(X_train, y_train, X_test, y_test, models):
                                         n_jobs=-1)
             search_cv.fit(X_train, y_train)
 
+            # Update model with best parameters
             model.set_params(**search_cv.best_params_)
             model.fit(X_train,y_train)
 
+            # Predictions
             y_train_pred = model.predict(X_train)
             y_test_pred = model.predict(X_test)
 
-            # Training set performance
-            train_accuracy, train_f1, train_precision, train_recall = evaluate_model(y_train, y_train_pred)
+            # Evaluate performance (Training set & Test set)
+            train_metrics = evaluate_model(y_train, y_train_pred)
+            test_metrics = evaluate_model(y_test, y_test_pred)
 
-            # Test set performance
-            test_accuracy, test_f1, test_precision, test_recall = evaluate_model(y_test, y_test_pred)
-
-            report[name] = test_accuracy
+            # Add to report
+            report[name] = {
+                "params": search_cv.best_params_,
+                "train_metrics": train_metrics,
+                "test_metrics": test_metrics
+            }
 
         return report
 
@@ -56,11 +58,30 @@ def evaluate_models(X_train, y_train, X_test, y_test, models):
         raise CustomException(e, sys)
 
 def evaluate_model(true, predicted):
-    accuracy = accuracy_score(true, predicted)  # Calculate Accuracy
-    f1 = f1_score(true, predicted, average='weighted')  # Calculate F1-score for multi-class
-    precision = precision_score(true, predicted, average='weighted')  # Calculate Precision for multi-class
-    recall = recall_score(true, predicted, average='weighted')  # Calculate Recall for multi-class
-    return accuracy, f1, precision, recall
+    metrics = {
+        "accuracy": accuracy_score(true, predicted),
+        "f1_score": f1_score(true, predicted, average='weighted'),
+        "precision": precision_score(true, predicted, average='weighted'),
+        "recall": recall_score(true, predicted, average='weighted'),
+    }
+    return metrics
+
+def calculate_score(metrics, weights=None):
+    if weights is None:
+        weights = { 
+            "accuracy": WeightScoreConfig.accuracy_weight, 
+            "f1_score": WeightScoreConfig.f1_score_weight, 
+            "precision": WeightScoreConfig.precision_weight, 
+            "recall": WeightScoreConfig.recall_weight
+        }
+    
+    score = 0
+    for metric, weight in weights.items():
+        score += metrics[metric] * weight
+    return score
+
+def meets_thresholds(metrics, thresholds):
+    return all(metrics[metric] >= threshold for metric, threshold in thresholds.items())
 
 def load_object(file_path):
     try:
